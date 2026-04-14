@@ -46,6 +46,14 @@ const setIntercomState = ({ isBooted }) => {
 }
 
 /**
+ * @param {{ settings: { app_id: string } & Record<string, unknown> }} params
+ * @returns {void}
+ */
+const setIntercomSettings = ({ settings }) => {
+  window.intercomSettings = settings
+}
+
+/**
  * @param {{ appId: string }} params
  * @returns {Promise<void>}
  */
@@ -124,6 +132,8 @@ const handleParentMessage = async event => {
     log({ message: 'Invalid Intercom payload received' })
     return
   }
+
+  setIntercomSettings({ settings: payload })
 
   try {
     await loadIntercomScript({ appId: payload.app_id })
