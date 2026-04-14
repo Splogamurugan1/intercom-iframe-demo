@@ -6,6 +6,16 @@ const INTERCOM_MESSAGE_TYPE = Object.freeze({
 
 const INTERCOM_SCRIPT_BASE_URL = 'https://widget.intercom.io/widget/'
 
+const STANDALONE_BOOT_QUERY_PARAM = Object.freeze({
+  ENABLE: 'standaloneIntercomBoot',
+  APP_ID: 'appId',
+  API_BASE: 'apiBase',
+  EMAIL: 'email',
+  USER_ID: 'userId',
+  NAME: 'name',
+  USER_HASH: 'userHash',
+})
+
 /**
  * Replace with your local parent origin when testing, e.g. 'http://localhost:5173'.
  * If you use a different port, update this.
@@ -51,6 +61,81 @@ const setIntercomState = ({ isBooted }) => {
  */
 const setIntercomSettings = ({ settings }) => {
   window.intercomSettings = settings
+}
+
+/**
+ * @returns {{ enabled: boolean; payload: ({ app_id: string } & Record<string, unknown>) | null }}
+ */
+const getStandaloneBootConfig = () => {
+  const searchParams = new URLSearchParams(window.location.search)
+  const enabled = searchParams.get(STANDALONE_BOOT_QUERY_PARAM.ENABLE) === 'true'
+
+  if (!enabled) {
+    return { enabled, payload: null }
+  }
+
+  const appId = searchParams.get(STANDALONE_BOOT_QUERY_PARAM.APP_ID) ?? ''
+  if (appId.trim().length === 0) {
+    return { enabled, payload: null }
+  }
+
+  const apiBase = searchParams.get(STANDALONE_BOOT_QUERY_PARAM.API_BASE) ?? ''
+  const email = searchParams.get(STANDALONE_BOOT_QUERY_PARAM.EMAIL) ?? ''
+  const userId = searchParams.get(STANDALONE_BOOT_QUERY_PARAM.USER_ID) ?? ''
+  const name = searchParams.get(STANDALONE_BOOT_QUERY_PARAM.NAME) ?? ''
+  const userHash = searchParams.get(STANDALONE_BOOT_QUERY_PARAM.USER_HASH) ?? ''
+
+  /** @type {{ app_id: string } & Record<string, unknown>} */
+  const payload = {
+    app_id: appId,
+  }
+
+  if (apiBase.trim().length > 0) {
+    payload.api_base = apiBase.trim()
+  }
+
+  if (email.trim().length > 0) {
+    payload.email = email.trim()
+  }
+
+  if (userId.trim().length > 0) {
+    payload.user_id = userId.trim()
+  }
+
+  if (name.trim().length > 0) {
+    payload.name = name.trim()
+  }
+
+  if (userHash.trim().length > 0) {
+    payload.user_hash = userHash.trim()
+  }
+
+  return { enabled, payload }
+}
+
+/**
+ * @param {{ payload: { app_id: string } & Record<string, unknown> }} params
+ * @returns {Promise<void>}
+ */
+const bootIntercomFromStandaloneConfig = async ({ payload }) => {
+  setIntercomSettings({ settings: payload })
+
+  try {
+    await loadIntercomScript({ appId: payload.app_id })
+  } catch (error) {
+    log({ message: 'Intercom script failed to load (standalone)' })
+    return
+  }
+
+  if (!window.Intercom) {
+    log({ message: 'Intercom global not available after script load (standalone)' })
+    return
+  }
+
+  window.Intercom('boot', payload)
+  isIntercomBooted = true
+  setIntercomState({ isBooted: true })
+  log({ message: 'Intercom booted (standalone mode)' })
 }
 
 /**
@@ -163,6 +248,12 @@ window.addEventListener('message', event => {
   void handleParentMessage(event)
 })
 
-window.parent.postMessage({ type: INTERCOM_MESSAGE_TYPE.IFRAME_READY }, '*')
-setIntercomState({ isBooted: false })
-log({ message: 'Waiting for parent to send INTERCOM_BOOT...' })
+const standaloneBootConfig = getStandaloneBootConfig()
+
+if (standaloneBootConfig.enabled && standaloneBootConfig.payload) {
+  void bootIntercomFromStandaloneConfig({ payload: standaloneBootConfig.payload })
+} else {
+  window.parent.postMessage({ type: INTERCOM_MESSAGE_TYPE.IFRAME_READY }, '*')
+  setIntercomState({ isBooted: false })
+  log({ message: 'Waiting for parent to send INTERCOM_BOOT...' })
+}
