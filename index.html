@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Intercom iframe app</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 24px;
+      }
+      .card {
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 16px;
+        max-width: 880px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 12px;
+      }
+      button {
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1px solid #d1d5db;
+        background: #111827;
+        color: #fff;
+        cursor: pointer;
+      }
+      .secondary {
+        background: #fff;
+        color: #111827;
+      }
+      .muted {
+        color: #6b7280;
+        font-size: 12px;
+        line-height: 1.4;
+        margin-top: 8px;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+        font-size: 12px;
+      }
+      .pill {
+        display: inline-block;
+        border: 1px solid #d1d5db;
+        border-radius: 999px;
+        padding: 4px 10px;
+        font-size: 12px;
+        color: #111827;
+        margin-top: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Iframe app (GitHub Pages)</h1>
+
+    <div class="card">
+      <div><strong>Intercom runs in this iframe</strong></div>
+      <div class="muted">
+        This app loads the Intercom snippet and waits for the parent page to send identity via
+        <code>postMessage</code>. Once booted, you can create a Product Tour that targets the
+        buttons below.
+      </div>
+
+      <div class="pill" id="intercomState" data-testid="intercom-state">Intercom: not booted</div>
+
+      <div class="row">
+        <button id="primaryCta" data-testid="primary-cta">Primary CTA</button>
+        <button id="secondaryCta" class="secondary" data-testid="secondary-cta">Secondary CTA</button>
+      </div>
+
+      <div class="muted" id="log"></div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
