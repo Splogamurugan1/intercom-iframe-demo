@@ -10,7 +10,7 @@ const INTERCOM_SCRIPT_BASE_URL = 'https://widget.intercom.io/widget/'
  * Replace with your local parent origin when testing, e.g. 'http://localhost:5173'.
  * If you use a different port, update this.
  */
-const ALLOWED_PARENT_ORIGINS = new Set(['http://localhost:5173', 'http://192.168.1.6:5173'])
+const ALLOWED_PARENT_ORIGINS = new Set(['http://localhost:5173', 'http://192.168.1.6:5173', 'http://127.0.0.1:5173'])
 
 /** @type {boolean} */
 let isIntercomBooted = false
