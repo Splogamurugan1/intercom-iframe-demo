@@ -134,7 +134,6 @@ const bootIntercomFromStandaloneConfig = async ({ payload }) => {
 
   window.Intercom('boot', payload)
   window.Intercom('update', { hide_default_launcher: false })
-  window.Intercom('show')
   isIntercomBooted = true
   setIntercomState({ isBooted: true })
   log({ message: 'Intercom booted (standalone mode)' })
